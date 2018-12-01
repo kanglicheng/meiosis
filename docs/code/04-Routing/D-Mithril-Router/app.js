@@ -1,72 +1,62 @@
-/* global
-m, href, BeerDetailsPage, BeerPage, CoffeeDetailsPage, CoffeePage, HomePage,
-createBeer, createBeerDetails, createCoffee, createHome, createNavigator,
-createNotFound, tabMap
-*/
+/* global m, href, createBeer, createBeerDetails, createCoffee, createHome,
+createNotFound, getUrl, tabMap */
 
 // eslint-disable-next-line no-unused-vars
-const createApp = update => {
-  const navigator = createNavigator(update);
+const createApp = (update, navigate) => {
+  const coffeeComponent = createCoffee({ update, navigate });
 
-  const coffeeComponent = createCoffee(navigator)(update);
-
-  // Register the pages, with the key (page id) the corresponding component,
-  // and the route.
-  navigator.register([
-    { key: HomePage, component: createHome(navigator)(update),
-      route: "/" },
-
-    { key: CoffeePage, component: coffeeComponent,
-      route: "/coffee" },
-
-    { key: CoffeeDetailsPage, component: coffeeComponent,
-      route: "/coffee/:id" },
-
-    { key: BeerPage, component: createBeer(navigator)(update),
-      route: "/beer" },
-
-    { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
-      route: "/beer/:id" }
-  ], createNotFound(navigator)(update));
-  // ^^ Indicate the component to use for when the page is not found.
+  // Register the pages, with the key (page id) the corresponding component
+  const components = {
+    HomePage: createHome({ update, navigate }),
+    CoffeePage: coffeeComponent,
+    CoffeeDetailsPage: coffeeComponent,
+    BeerPage: createBeer({ update, navigate }),
+    BeerDetailsPage: createBeerDetails({ update, navigate }),
+    NotFoundPage: createNotFound()
+  };
 
   return {
-    navigator,
+    onNavigate: Object.keys(components).reduce((result, id) => {
+      if (components[id].onNavigate) {
+        result[id] = components[id].onNavigate;
+      }
+      return result;
+    }, {}),
     view: vnode => {
       const model = vnode.attrs.model;
       // Get the component and tab for the current page.
-      const Component = navigator.getComponent(model.pageId);
-      const currentTab = tabMap[model.pageId] || model.pageId;
+      const Component = components[model.route.id];
+      const currentTab = tabMap[model.route.id] || model.route.id;
       const isActive = tab => tab === currentTab ? ".active" : "";
 
       return (
         m("div",
           m("nav.navbar.navbar-default",
             m("ul.nav.navbar-nav",
-              m("li" + isActive(HomePage),
-                m("a", href(navigator.getUrl(HomePage)), "Home")
+              m("li" + isActive("HomePage"),
+                m("a", href(getUrl("HomePage")), "Home")
               ),
-              m("li" + isActive(CoffeePage),
-                m("a", href(navigator.getUrl(CoffeePage)), "Coffee")
+              m("li" + isActive("CoffeePage"),
+                m("a", href(getUrl("CoffeePage")), "Coffee")
               ),
-              m("li" + isActive(BeerPage),
-                m("a", href(navigator.getUrl(BeerPage)), "Beer")
+              m("li" + isActive("BeerPage"),
+                m("a", href(getUrl("BeerPage")), "Beer")
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => navigator.navigateTo(HomePage) },
+                  { onclick: _evt => navigate({ route: { id: "HomePage" } }) },
                   "Home"
                 )
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => navigator.navigateTo(CoffeePage) },
+                  { onclick: _evt => navigate({ route: { id: "CoffeePage" } }) },
                   "Coffee"
                 )
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => navigator.navigateTo(BeerPage) },
+                  { onclick: _evt => navigate({ route: { id: "BeerPage" } }) },
                   "Beer"
                 )
               )

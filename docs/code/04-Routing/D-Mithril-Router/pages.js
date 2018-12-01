@@ -1,14 +1,14 @@
-/* global m, O, href, BeerDetailsPage, CoffeeDetailsPage, HomePage */
+/* global m, O, getUrl, href */
 
 /* 404 Not Found Page */
 
 // eslint-disable-next-line no-unused-vars
-const createNotFound = navigator => _update => ({
+const createNotFound = () => ({
   view: _vnode => m("div",
     m("div", "Not Found Page"),
     m("div", "Sorry, we could not find what you were looking 4...04"),
     m("div",
-      m("a", href(navigator.getUrl(HomePage)), "Home Page")
+      m("a", href(getUrl("HomePage")), "Home Page")
     )
   )
 });
@@ -16,7 +16,7 @@ const createNotFound = navigator => _update => ({
 /* Home Page */
 
 // eslint-disable-next-line no-unused-vars
-const createHome = _navigator => _update => ({
+const createHome = () => ({
   view: _vnode => m("div", "Home Page")
 });
 
@@ -33,14 +33,14 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 // eslint-disable-next-line no-unused-vars
-const createCoffee = navigator => _update => ({
-  navigating: (params, navigate) => {
-    if (params && params.id) {
-      const coffee = coffeeMap[params.id];
-      navigate({ coffees, coffee: coffee.description });
+const createCoffee = ({ navigate }) => ({
+  onNavigate: ({ navigation, update }) => {
+    if (navigation.route.values && navigation.route.values.id) {
+      const coffee = coffeeMap[navigation.route.values.id];
+      update(Object.assign({ coffees, coffee: coffee.description }, navigation));
     }
     else {
-      navigate({ coffees, coffee: O });
+      update(Object.assign({ coffees, coffee: O }, navigation));
     }
   },
   view: vnode => {
@@ -50,12 +50,12 @@ const createCoffee = navigator => _update => ({
       m("ul",
         model.coffees.map(coffee =>
           m("li", { key: coffee.id },
-            m("a", href(navigator.getUrl(CoffeeDetailsPage, { id: coffee.id })),
+            m("a", href(getUrl("CoffeeDetailsPage", { id: coffee.id })),
               coffee.title),
             " ",
             m("button.btn.btn-default.btn-xs", {
               onclick: () =>
-                navigator.navigateTo(CoffeeDetailsPage, { id: coffee.id })
+                navigate({ route: { id: "CoffeeDetailsPage", values: { id: coffee.id } } })
             }, coffee.title)
           )
         )
@@ -81,12 +81,12 @@ const beerMap = beers.reduce((result, next) => {
 }, {});
 
 // eslint-disable-next-line no-unused-vars
-const createBeer = navigator => update => ({
-  navigating: (_params, navigate) => {
+const createBeer = () => ({
+  onNavigate: ({ update, navigation }) => {
     update({ pleaseWait: true });
 
     loadBeers().then(beers => {
-      navigate({ pleaseWait: false, beers });
+      update(Object.assign({ pleaseWait: false, beers }, navigation));
     });
   },
   view: vnode =>
@@ -95,12 +95,12 @@ const createBeer = navigator => update => ({
       m("ul",
         vnode.attrs.model.beers.map(beer =>
           m("li", { key: beer.id },
-            m("a", href(navigator.getUrl(BeerDetailsPage, { id: beer.id })),
+            m("a", href(getUrl("BeerDetailsPage", { id: beer.id })),
               beer.title),
             " ",
             m("button.btn.btn-default.btn-xs",
               { onclick: _evt =>
-                m.route.set(navigator.getUrl(BeerDetailsPage, { id: beer.id }))
+                m.route.set(getUrl("BeerDetailsPage", { id: beer.id }))
               },
               beer.title
             )
@@ -113,9 +113,9 @@ const createBeer = navigator => update => ({
 /* Beer Details Page */
 
 // eslint-disable-next-line no-unused-vars
-const createBeerDetails = _navigator =>  update => ({
-  navigating: (params, navigate) =>
-    navigate({ beer: beerMap[params.id].description }),
+const createBeerDetails = () => ({
+  onNavigate: ({ update, navigation }) =>
+    update(Object.assign({ beer: beerMap[navigation.route.values.id].description }, navigation)),
 
   view: vnode => m("p", vnode.attrs.model.beer)
 });
