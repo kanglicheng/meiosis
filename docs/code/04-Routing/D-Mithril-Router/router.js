@@ -17,7 +17,7 @@ const toPath = Object.keys(routes).reduce((result, id) => {
 }, {});
 
 // eslint-disable-next-line no-unused-vars
-const getUrl = (pageId, values = {}) => {
-  const stringify = toPath[pageId];
+const getUrl = (id, values = {}) => {
+  const stringify = toPath[id];
   return stringify && stringify(values);
 };

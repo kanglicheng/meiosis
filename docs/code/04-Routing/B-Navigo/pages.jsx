@@ -1,14 +1,14 @@
-/* global BeerDetailsPage, CoffeeDetailsPage, HomePage, React */
+/* global React, getUrl */
 
 /* 404 Not Found Page */
 
 // eslint-disable-next-line no-unused-vars
-const createNotFound = navigator => _update => ({
+const createNotFound = () => ({
   view: _model => (<div>
     <div>Not Found Page</div>
     <div>Sorry, we could not find what you were looking 4...04</div>
     <div>
-      <a href={navigator.getUrl(HomePage)}>Home Page</a>
+      <a href={getUrl("HomePage")}>Home Page</a>
     </div>
   </div>)
 });
@@ -16,7 +16,7 @@ const createNotFound = navigator => _update => ({
 /* Home Page */
 
 // eslint-disable-next-line no-unused-vars
-const createHome = _navigator => _update => ({
+const createHome = () => ({
   view: _model => (<div>Home Page</div>)
 });
 
@@ -33,14 +33,14 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 // eslint-disable-next-line no-unused-vars
-const createCoffee = navigator => update => ({
-  navigating: (params, navigate) => {
-    if (params && params.id) {
-      const coffee = coffeeMap[params.id];
-      navigate(model => Object.assign(model, { coffees, coffee: coffee.description }));
+const createCoffee = ({ navigate }) => ({
+  onNavigate: ({ navigation, update }) => {
+    if (navigation.route.values && navigation.route.values.id) {
+      const coffee = coffeeMap[navigation.route.values.id];
+      update(model => Object.assign(model, { coffees, coffee: coffee.description }, navigation));
     }
     else {
-      navigate(model => Object.assign(model, { coffees, coffee: null }));
+      update(model => Object.assign(model, { coffees, coffee: null }, navigation));
     }
   },
   view: model => (
@@ -49,12 +49,12 @@ const createCoffee = navigator => update => ({
       <ul>
         {model.coffees.map(coffee =>
           <li key={coffee.id}>
-            <a href={navigator.getUrl(CoffeeDetailsPage, { id: coffee.id })}
+            <a href={getUrl("CoffeeDetailsPage", { id: coffee.id })}
             >{coffee.title}</a>
             {" "}
             <button className="btn btn-default btn-xs"
               onClick={() =>
-                navigator.navigateTo(CoffeeDetailsPage, { id: coffee.id })}>
+                navigate({ route: { id: "CoffeeDetailsPage", values: { id: coffee.id } } })}>
               {coffee.title}
             </button>
           </li>
@@ -81,12 +81,12 @@ const beerMap = beers.reduce((result, next) => {
 }, {});
 
 // eslint-disable-next-line no-unused-vars
-const createBeer = navigator => update => ({
-  navigating: (_params, navigate) => {
+const createBeer = ({ navigate }) => ({
+  onNavigate: ({ update, navigation }) => {
     update(model => Object.assign(model, { pleaseWait: true }));
 
     loadBeers().then(beers => {
-      navigate(model => Object.assign(model, { pleaseWait: false, beers }));
+      update(model => Object.assign(model, { pleaseWait: false, beers }, navigation));
     });
   },
   view: model => (
@@ -95,12 +95,12 @@ const createBeer = navigator => update => ({
       <ul>
         {model.beers.map(beer =>
           <li key={beer.id}>
-            <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
+            <a href={getUrl("BeerDetailsPage", { id: beer.id })}
             >{beer.title}</a>
             {" "}
             <button className="btn btn-default btn-xs"
               onClick={() =>
-                navigator.navigateTo(BeerDetailsPage, { id: beer.id })}>
+                navigate({ route: { id: "BeerDetailsPage", values: { id: beer.id } } })}>
               {beer.title}
             </button>
           </li>
@@ -113,9 +113,10 @@ const createBeer = navigator => update => ({
 /* Beer Details Page */
 
 // eslint-disable-next-line no-unused-vars
-const createBeerDetails = _navigator =>  _update => ({
-  navigating: (params, navigate) =>
-    navigate(model => Object.assign(model, { beer: beerMap[params.id].description })),
+const createBeerDetails = () => ({
+  onNavigate: ({ update, navigation }) =>
+    update(model => Object.assign(model,
+      { beer: beerMap[navigation.route.values.id].description }, navigation)),
 
   view: model => (<p>{model.beer}</p>)
 });
