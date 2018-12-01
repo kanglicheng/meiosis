@@ -58,8 +58,8 @@ In the navigator, we'll need to handle routes.
 In this example, we'll use [Navigo](https://github.com/krasimir/navigo). However, note that you can
 use a different router with minimal effort. You only need to change the navigator to use your
 preferred library. The rest of the application does not need to change. In fact, to demonstrate this,
-we'll use a different library, [Navigation](https://grahammendick.github.io/navigation/), in the
-[next section](#routing_navigation).
+we'll use a different library, [Superouter](https://gitlab.com/harth/superouter/), in the
+[next section](#routing_superouter).
 
 Now, in the navigator, instead of constructing a map of navigation functions, we'll build Navigo
 routes:
@@ -191,11 +191,11 @@ models.map(model => {
 
 Now, tracing through history reflects the correct URL.
 
-<a name="routing_navigation"></a>
-## Using Navigation
+<a name="routing_superouter"></a>
+## Using Superouter
 
 We used Navigo, but we can use other routing libraries with minimal changes. For example, let's try
-using [Navigation](https://grahammendick.github.io/navigation/), which is a "data first, routes last"
+using [Superouter](https://gitlab.com/harth/superouter/), which is a "composeable, serializable"
 approach to routing - a great fit for us.
 
 ### Specifying Routes
