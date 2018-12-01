@@ -7,7 +7,7 @@ const routes = {
   CoffeeDetailsPage: "/coffee/:id",
   BeerPage: "/beer",
   BeerDetailsPage: "/beer/:id",
-  NotFoundPage: "/:404..."
+  NotFoundPage: "/:404+"
 };
 
 const router = new Navigo(null, true);
